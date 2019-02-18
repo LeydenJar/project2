@@ -5,7 +5,6 @@ from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_session import Session
 
-
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 socketio = SocketIO(app)
@@ -29,5 +28,5 @@ def index():
     return render_template("home.html")
 @app.route("/channels", methods=['POST'])
 def canais():
-	user = request.form.get('nome')
+	user = request.form.get('user')
 	return render_template('channels.html', x=user)
