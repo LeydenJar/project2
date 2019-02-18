@@ -16,14 +16,43 @@
       }
       #FundoIn{
         position:fixed;
-
       }
+      #logo{
+        position: absolute;
+        top:45%;
+        left:50%;
+        transform: translateX(-50%) translateY(-50%);
+        z-index:1;
+      }
+      #input{
+        position:absolute;
+        top:55%;
+        left:50%;
+        transform: translateX(-50%) translateY(-50%);
+        z-index:1;
+      }
+
+      #button{
+        position:relative;
+        left:50%;
+        transform: translateX(-50%);
+      }
+
     </style>
   </head>
 
   <body>
+    <div id='logo'>
+      <h1>Logo<h1>
+    </div>
     <div id='FundoIn'>
       <img id='imagem' src="static/fundo_flack.jpg">
+    </div>
+    <div id='input'>
+      <form>
+        <input type='text' placeholder='Seu Nome' name='nome'></input><br/>
+        <button id='button' type='submit'>Enter</button>
+      </form>
     </div>
   </body>
 </html>
