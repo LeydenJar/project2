@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flack</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <style>
 
       *{
@@ -18,15 +19,23 @@
         position:fixed;
       }
       #logo{
+
         position: absolute;
-        top:45%;
+        top:43%;
         left:50%;
         transform: translateX(-50%) translateY(-50%);
         z-index:1;
       }
+      #logo img{
+        position: relative;
+        left:50%;
+        transform:translateX(-50%);
+        width:40%;
+        z-index:2;
+      }
       #input{
         position:absolute;
-        top:55%;
+        top:57%;
         left:50%;
         transform: translateX(-50%) translateY(-50%);
         z-index:1;
@@ -34,8 +43,8 @@
 
       #button{
         position:relative;
-        left:50%;
-        transform: translateX(-50%);
+        width:50px;
+        margin:3px;
       }
 
     </style>
@@ -43,7 +52,7 @@
 
   <body>
     <div id='logo'>
-      <h1>Logo<h1>
+      <img src='static/logo_flack.png'></img>
     </div>
     <div id='FundoIn'>
       <img id='imagem' src="static/fundo_flack.jpg">

@@ -6,10 +6,10 @@ from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_session import Session
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+app.config["SECRET_KEY"] = "Secret"
 socketio = SocketIO(app)
 
-app.config["SESSION_PERMANENT"] = 'False'
+app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 
 now = datetime.datetime.now()
@@ -30,3 +30,11 @@ def index():
 def canais():
 	user = request.form.get('user')
 	return render_template('channels.html', x=user)
+
+@socketio.on('send_message')
+def message(msg):
+	mensagem = msg["mensagem"]
+	emit('broadcast_message', {'mensagem' : mensagem}, broadcast=True)
+
+if __name__ == "__main__":
+	socketio.run(app, debug=True)
