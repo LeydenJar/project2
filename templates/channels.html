@@ -16,7 +16,8 @@
 
 			document.querySelector('#button').onclick = () =>{
 				msg = document.querySelector('#input').value;
-				socket.emit('send_message', {'mensagem' : msg});
+				x2 = '{{x}}';
+				socket.emit('send_message', {'mensagem' : msg, 'user' : x2});
 				document.querySelector('#input').value = '';
 				return false;
 			};
@@ -24,13 +25,9 @@
 
 		socket.on('broadcast_message', data =>{
 			const li = document.createElement('li');
-			li.innerHTML = data.mensagem;
+			li.innerHTML = data.user +'--'+ data.mensagem;
 			document.querySelector('ul').appendChild(li);
-
-
 		});
-
-
 	});
 
 
@@ -68,7 +65,7 @@
 </head>
 <body>
 	{{x}}
-
+	<a id='logout' href="{{url_for('logout')}}">Logout</a>
 	<div id='ChatBox'>
 		<ul id:'lista'></ul>
 	</div>
