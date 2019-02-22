@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>Flack - Channels</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
 
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
@@ -26,7 +27,7 @@
 		socket.on('broadcast_message', data =>{
 			const li = document.createElement('li');
 			li.innerHTML = data.user +'--'+ data.mensagem;
-			document.querySelector('ul').appendChild(li);
+			document.querySelector('#ChatBox ul').appendChild(li);
 		});
 	});
 
@@ -37,35 +38,66 @@
 	<style>
 		#ChatBox{
 			position:absolute;
-			left:50%;
+			left:30%;
 			transform:translateX(-50%);
-			top:30%;
+			top:15%;
 			width:40%;
-			height:50%;
+			height:65%;
 			background-color:LightGrey;
 			border:solid DarkGrey;
 			z-index:1;
+			margin-right:50px;
 		}
 
 		#input{
 			position:absolute;
-			left:50%;
+			left:30%;
 			transform:translateX(-50%);
 			width:40%;
 			top:83%;
+			z-index:2;
+			margin-right:50px;
 		}
 		#button{
 			position:absolute;
-			left:50%;
+			left:30%;
 			transform:translateX(-50%);
 			top:87%;
+		}
+		#Hi{
+			position:absolute;
+			left:0;
+			top:0;
+			margin:20px;
+		}
 
+		#create_room{
+			position:absolute;
+			left:50%;
+			top:75%;
+			margin:30px;
+			padding:20px;
+		}
+
+		#room_selection{
+			position:absolute;
+			width:20%;
+			height:65%;
+			left: 50%;
+			margin-left:50px;
+			padding:20px;
+			top:15%;
+			background-color:blue;
 		}
 	</style>
 </head>
 <body>
-	{{x}}
-	<a id='logout' href="{{url_for('logout')}}">Logout</a>
+	<ul class="nav justify-content-end">
+	  <li class="nav-item">
+	  	<a id='logout' class = 'nav-link' href="{{url_for('logout')}}">Logout</a>
+	  </li>
+	</ul>
+	<h3 id='Hi'>Hi {{x}}</h3>
 	<div id='ChatBox'>
 		<ul id:'lista'></ul>
 	</div>
@@ -74,6 +106,14 @@
 	<input type:'text' placeholder:'type your message' name:'message' autocomplete = 'off' id='input'></input>
 	<button id='button'>Enviar</button>
 
+	<div id='room_selection'></div>
+
+	<div id='create_room'>
+		<form>
+			<input id='create_room_name' type='text' name='room_name' placeholder='Room Name'></input>
+			<button id='create_room_button'>Create Room</button>
+		</form>
+	</div>
 
 </body>
 </html>
