@@ -9,12 +9,12 @@
 
 	<script>
 
+var channel_list = [];
+var current_channel = [];
+
 	document.addEventListener('DOMContentLoaded', ()=>{
-
 		var socket=io.connect(location.protocol + '//' + document.domain + ':' + location.port);
-
 		socket.on('connect', ()=>{
-
 			document.querySelector('#button').onclick = () =>{
 				msg = document.querySelector('#input').value;
 				x2 = '{{x}}';
@@ -22,6 +22,25 @@
 				document.querySelector('#input').value = '';
 				return false;
 			};
+
+			document.querySelector('#create_room form #create_room_button').onclick = () =>{
+				room_name = document.querySelector('#create_room form #create_room_name').value;
+				socket.emit('create_room', {'room_name' : room_name});
+				document.querySelector('#create_room form #create_room_name').value = '';
+				return false;
+			};
+		});
+
+
+
+
+		socket.on('broadcast_new_room', data => {
+			room_name = data.room_name;
+			const li = document.createElement('li');
+			li.innerHTML = data.room_name;
+			document.querySelector('#room_selection ul').appendChild(li);
+
+
 		});
 
 		socket.on('broadcast_message', data =>{
@@ -87,7 +106,7 @@
 			margin-left:50px;
 			padding:20px;
 			top:15%;
-			background-color:blue;
+			background-color:LightGrey;
 		}
 	</style>
 </head>
@@ -106,7 +125,12 @@
 	<input type:'text' placeholder:'type your message' name:'message' autocomplete = 'off' id='input'></input>
 	<button id='button'>Enviar</button>
 
-	<div id='room_selection'></div>
+	<div id='room_selection'>
+		<ul id='channels_list'>
+
+		</ul>
+
+	</div>
 
 	<div id='create_room'>
 		<form>

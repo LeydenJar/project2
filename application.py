@@ -59,5 +59,10 @@ def message(msg):
 	user = msg["user"]
 	emit('broadcast_message', {'mensagem' : mensagem, 'user' : user}, broadcast=True)
 
+@socketio.on('create_room')
+def create_room(data):
+	room_name = data["room_name"];
+	emit('broadcast_new_room', {'room_name' : room_name}, broadcast=True)
+
 if __name__ == "__main__":
 	socketio.run(app, debug=True)
