@@ -35,13 +35,12 @@ var current_room = 'default';
 		});
 
 
-
-
 		socket.on('broadcast_new_room', data => {
 			room_name = data.room_name;
-			const li = document.createElement('li');
-			li.innerHTML = data.room_name;
-			document.querySelector('#room_selection ul').appendChild(li);
+			const button = document.createElement('button');
+			button.innerHTML = data.room_name;
+			button.setAttribute("class", "room_button")
+			document.querySelector('#room_selection').appendChild(button);
 
 
 		});
@@ -111,6 +110,12 @@ var current_room = 'default';
 			top:15%;
 			background-color:LightGrey;
 		}
+
+		.room_button{
+			width:100%;
+			margin:5px;
+
+		}
 	</style>
 </head>
 <body>
@@ -129,9 +134,7 @@ var current_room = 'default';
 	<button id='button'>Enviar</button>
 
 	<div id='room_selection'>
-		<ul id='channels_list'>
 
-		</ul>
 
 	</div>
 
