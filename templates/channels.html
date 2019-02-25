@@ -10,22 +10,25 @@
 	<script>
 
 var channel_list = [];
-var current_channel = [];
+var current_room = 'default';
 
 	document.addEventListener('DOMContentLoaded', ()=>{
 		var socket=io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 		socket.on('connect', ()=>{
+
 			document.querySelector('#button').onclick = () =>{
 				msg = document.querySelector('#input').value;
 				x2 = '{{x}}';
-				socket.emit('send_message', {'mensagem' : msg, 'user' : x2});
+				socket.emit('send_message', {'mensagem' : msg, 'user' : x2, 'current_room' : current_room});
 				document.querySelector('#input').value = '';
 				return false;
 			};
 
 			document.querySelector('#create_room form #create_room_button').onclick = () =>{
 				room_name = document.querySelector('#create_room form #create_room_name').value;
-				socket.emit('create_room', {'room_name' : room_name});
+				rooml = current_room;
+				current_room = room_name;
+				socket.emit('create_room', {'room_name' : room_name, 'rooml' : rooml});
 				document.querySelector('#create_room form #create_room_name').value = '';
 				return false;
 			};
