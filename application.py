@@ -4,6 +4,7 @@ import datetime
 from flask import Flask, render_template, request, redirect, session
 from flask_socketio import SocketIO, emit, join_room, leave_room, rooms
 from flask_session import Session
+import sys
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "Secret"
@@ -15,6 +16,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 now = datetime.datetime.now()
+rooms = ['pixirica', 'arruai']
 
 
 def getlog():
@@ -37,7 +39,7 @@ def index():
 
 @app.route("/channels", methods=['POST', 'GET'])
 def canais():
-
+	print('I am starting the function', file=sys.stderr)
 	if request.method=='GET':
 		u = getlog()
 		if u == None:
@@ -53,6 +55,12 @@ def logout():
 	session['user']=None
 	return redirect('/')
 
+@socketio.on('ask_rooms')
+def pass_rooms():
+	print('**********I am starting the function ASKROOMS**************', file=sys.stderr)
+	r = rooms
+	emit('passing_rooms', {'rooms':r})
+
 @socketio.on('send_message')
 def message(msg):
 	mensagem = msg["mensagem"]
@@ -64,14 +72,17 @@ def message(msg):
 def create_room(data):
 	room_name = str(data["room_name"])
 	rooml = data['rooml']
-	emit('broadcast_new_room', {'room_name' : room_name}, broadcast=True)
+	rooms.append(room_name)
 	leave_room(rooml)
 	join_room(room_name)
+	emit('broadcast_new_room', {'room_name' : room_name}, broadcast=True)
 
 
 @socketio.on('join_room')
 def join(data):
+	print('**********im starting the function join_room**************', file=sys.stderr)
 	room = data['room']
+	print('Trying to conect to a room',  file=sys.stderr)
 	rooml = data['rooml']
 	leave_room(rooml)
 	join_room(room)
