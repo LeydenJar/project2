@@ -2,35 +2,54 @@
 <html>
 <head>
 	<title>Flack - Channels</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
 
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
 
 	<script>
 
+var channel_list = [];
+var current_room = 'default';
+
 	document.addEventListener('DOMContentLoaded', ()=>{
-
 		var socket=io.connect(location.protocol + '//' + document.domain + ':' + location.port);
-
 		socket.on('connect', ()=>{
 
 			document.querySelector('#button').onclick = () =>{
 				msg = document.querySelector('#input').value;
-				socket.emit('send_message', {'mensagem' : msg});
+				x2 = '{{x}}';
+				socket.emit('send_message', {'mensagem' : msg, 'user' : x2, 'current_room' : current_room});
 				document.querySelector('#input').value = '';
+				return false;
+			};
+
+			document.querySelector('#create_room form #create_room_button').onclick = () =>{
+				room_name = document.querySelector('#create_room form #create_room_name').value;
+				rooml = current_room;
+				current_room = room_name;
+				socket.emit('create_room', {'room_name' : room_name, 'rooml' : rooml});
+				document.querySelector('#create_room form #create_room_name').value = '';
 				return false;
 			};
 		});
 
-		socket.on('broadcast_message', data =>{
-			const li = document.createElement('li');
-			li.innerHTML = data.mensagem;
-			document.querySelector('ul').appendChild(li);
+
+		socket.on('broadcast_new_room', data => {
+			room_name = data.room_name;
+			const button = document.createElement('button');
+			button.innerHTML = data.room_name;
+			button.setAttribute("class", "room_button")
+			document.querySelector('#room_selection').appendChild(button);
 
 
 		});
 
-
+		socket.on('broadcast_message', data =>{
+			const li = document.createElement('li');
+			li.innerHTML = data.user +'--'+ data.mensagem;
+			document.querySelector('#ChatBox ul').appendChild(li);
+		});
 	});
 
 
@@ -40,35 +59,72 @@
 	<style>
 		#ChatBox{
 			position:absolute;
-			left:50%;
+			left:30%;
 			transform:translateX(-50%);
-			top:30%;
+			top:15%;
 			width:40%;
-			height:50%;
+			height:65%;
 			background-color:LightGrey;
 			border:solid DarkGrey;
 			z-index:1;
+			margin-right:50px;
 		}
 
 		#input{
 			position:absolute;
-			left:50%;
+			left:30%;
 			transform:translateX(-50%);
 			width:40%;
 			top:83%;
+			z-index:2;
+			margin-right:50px;
 		}
 		#button{
 			position:absolute;
-			left:50%;
+			left:30%;
 			transform:translateX(-50%);
 			top:87%;
+		}
+		#Hi{
+			position:absolute;
+			left:0;
+			top:0;
+			margin:20px;
+		}
+
+		#create_room{
+			position:absolute;
+			left:50%;
+			top:75%;
+			margin:30px;
+			padding:20px;
+		}
+
+		#room_selection{
+			position:absolute;
+			width:20%;
+			height:65%;
+			left: 50%;
+			margin-left:50px;
+			padding:20px;
+			top:15%;
+			background-color:LightGrey;
+		}
+
+		.room_button{
+			width:100%;
+			margin:5px;
 
 		}
 	</style>
 </head>
 <body>
-	{{x}}
-
+	<ul class="nav justify-content-end">
+	  <li class="nav-item">
+	  	<a id='logout' class = 'nav-link' href="{{url_for('logout')}}">Logout</a>
+	  </li>
+	</ul>
+	<h3 id='Hi'>Hi {{x}}</h3>
 	<div id='ChatBox'>
 		<ul id:'lista'></ul>
 	</div>
@@ -77,6 +133,17 @@
 	<input type:'text' placeholder:'type your message' name:'message' autocomplete = 'off' id='input'></input>
 	<button id='button'>Enviar</button>
 
+	<div id='room_selection'>
+
+
+	</div>
+
+	<div id='create_room'>
+		<form>
+			<input id='create_room_name' type='text' name='room_name' placeholder='Room Name'></input>
+			<button id='create_room_button'>Create Room</button>
+		</form>
+	</div>
 
 </body>
 </html>

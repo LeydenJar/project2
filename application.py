@@ -1,8 +1,8 @@
 import os
 
 import datetime
-from flask import Flask, render_template, request
-from flask_socketio import SocketIO, emit, join_room, leave_room
+from flask import Flask, render_template, request, redirect, session
+from flask_socketio import SocketIO, emit, join_room, leave_room, rooms
 from flask_session import Session
 
 app = Flask(__name__)
@@ -11,6 +11,8 @@ socketio = SocketIO(app)
 
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+
+Session(app)
 
 now = datetime.datetime.now()
 
@@ -25,16 +27,55 @@ def getlog():
 
 @app.route("/")
 def index():
-    return render_template("home.html")
-@app.route("/channels", methods=['POST'])
+	u = getlog()
+	if u == None:
+		return render_template('home.html')
+	else:
+		return redirect('/channels')
+
+
+
+@app.route("/channels", methods=['POST', 'GET'])
 def canais():
-	user = request.form.get('user')
-	return render_template('channels.html', x=user)
+
+	if request.method=='GET':
+		u = getlog()
+		if u == None:
+			return redirect('/')
+		else:
+			return render_template('channels.html', x=session['user'])
+	else:
+		session['user'] = request.form.get('user')
+		return render_template('channels.html', x=session['user'])
+
+@app.route("/logout")
+def logout():
+	session['user']=None
+	return redirect('/')
 
 @socketio.on('send_message')
 def message(msg):
 	mensagem = msg["mensagem"]
-	emit('broadcast_message', {'mensagem' : mensagem}, broadcast=True)
+	user = msg["user"]
+	room = msg["current_room"]
+	emit('broadcast_message', {'mensagem' : mensagem, 'user' : user}, room=room)
+
+@socketio.on('create_room')
+def create_room(data):
+	room_name = str(data["room_name"])
+	rooml = data['rooml']
+	emit('broadcast_new_room', {'room_name' : room_name}, broadcast=True)
+	leave_room(rooml)
+	join_room(room_name)
+
+
+@socketio.on('join_room')
+def join(data):
+	room = data['room']
+	rooml = data['rooml']
+	leave_room(rooml)
+	join_room(room)
+
 
 if __name__ == "__main__":
 	socketio.run(app, debug=True)
