@@ -90,17 +90,13 @@ var current_room = 'default';
 		});
 
 		socket.on('broadcast_message', data =>{
-			const li = document.createElement('li');
-			li.innerHTML = data.user +'--'+ data.mensagem;
-			document.querySelector('#ChatBox ul').appendChild(li);
+			const div = document.createElement('div');
+			div.innerHTML = data.user +'--'+ data.mensagem;
+			div.setAttribute("class", "msg_div");
+			document.querySelector('#ChatBox').appendChild(div);
 			chatBox.scrollTop = chatBox.scrollHeight;
 		});
 	});
-
-
-
-
-
 
 
 	</script>
@@ -117,6 +113,7 @@ var current_room = 'default';
 			border:solid DarkGrey;
 			z-index:1;
 			margin-right:50px;
+			padding:20px;
 			overflow-y: auto;
 			overflow-x: inherit;
 		}
@@ -168,6 +165,12 @@ var current_room = 'default';
 		.room_button{
 			width:100%;
 			margin:5px;
+		}
+
+		.msg_div{
+			background-color: white;
+			margin-bottom: 5px;
+			width:100%;
 
 		}
 	</style>
@@ -180,7 +183,6 @@ var current_room = 'default';
 	</ul>
 	<h3 id='Hi'>Hi {{x}}</h3>
 	<div id='ChatBox'>
-		<ul id:'lista'></ul>
 	</div>
 
 
