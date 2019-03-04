@@ -88,7 +88,7 @@ var current_room = 'default';
 			button.innerHTML = data.room_name;
 			button.setAttribute("class", "room_button")
 			document.querySelector('#room_selection').appendChild(button);
-
+			socket.emit('button_ask');
 		});
 
 		socket.on('broadcast_message', data =>{
