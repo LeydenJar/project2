@@ -64,18 +64,22 @@ var current_room = 'default';
 
 		});
 
-		socket.on('button_functionality', data=>{
-			if (document.querySelectorAll('.room_button').lenght > 0){
-						console.log('running4');
+		socket.on('button_functionality', ()=>{
+			console.log('running0');
+			if (document.querySelectorAll('.room_button').length > 0){
+						console.log('running');
 						document.querySelectorAll('.room_button').forEach(function(button){
+							console.log('running2');
 								button.onclick = ()=>{
-										room = button.innerHTML;
-										rooml = current_room;
+									room = button.innerHTML;
+									rooml = current_room;
+									console.log('running3');
 										socket.emit('join_room', {'room' : room, 'rooml' : rooml});
+										current_room = room;
 										return false;
 					}
 				})
-			}})
+			}});
 
 		socket.on('broadcast_new_room', data => {
 			room_name = data.room_name;

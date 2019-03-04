@@ -82,10 +82,16 @@ def create_room(data):
 def join(data):
 	print('**********im starting the function join_room**************', file=sys.stderr)
 	room = data['room']
-	print('Trying to conect to a room',  file=sys.stderr)
 	rooml = data['rooml']
-	leave_room(rooml)
+	print(room,  file=sys.stderr)
 	join_room(room)
+	if rooml is not None:
+		leave_room(rooml)
+
+
+@socketio.on('button_ask')
+def butt():
+	emit('button_functionality')
 
 
 if __name__ == "__main__":
