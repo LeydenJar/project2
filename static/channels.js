@@ -13,7 +13,7 @@ var current_room = 'default';
 
 			document.querySelector('#button').onclick = () =>{
 				msg = document.querySelector('#input').value;
-				x2 = name_of_user;
+				x2 = nome_user;
 				socket.emit('send_message', {'mensagem' : msg, 'user' : x2, 'current_room' : current_room});
 				document.querySelector('#input').value = '';
 				return false;
