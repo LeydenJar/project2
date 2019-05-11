@@ -66,6 +66,9 @@ def message(msg):
 	mensagem = msg["mensagem"]
 	user = msg["user"]
 	room = msg["current_room"]
+	#print("Cheguei ate aqui", file=sys.stderr)
+	#time = str(datetime.datetime.hour()+":"+datetime.datetime.minute())
+	#print(time, file=sys.stderr)
 	emit('broadcast_message', {'mensagem' : mensagem, 'user' : user}, room=room)
 
 @socketio.on('create_room')

@@ -1,0 +1,77 @@
+#ChatBox{
+  position:absolute;
+  left:30%;
+  transform:translateX(-50%);
+  top:15%;
+  width:40%;
+  height:65%;
+  background-color:LightGrey;
+  border:solid DarkGrey;
+  z-index:1;
+  margin-right:50px;
+  padding:10px;
+  border-radius:5px;
+  overflow-y: auto;
+  overflow-x: inherit;
+}
+
+#input{
+  position:absolute;
+  left:30%;
+  transform:translateX(-50%);
+  width:40%;
+  top:83%;
+  z-index:2;
+  margin-right:50px;
+}
+
+#button{
+  position:absolute;
+  left:30%;
+  transform:translateX(-50%);
+  top:87%;
+}
+#Hi{
+  position:absolute;
+  left:0;
+  top:0;
+  margin:20px;
+}
+
+#create_room{
+  position:absolute;
+  left:50%;
+  top:75%;
+  margin:30px;
+  padding:20px;
+}
+
+#room_selection{
+  position:absolute;
+  width:20%;
+  height:65%;
+  left: 50%;
+  margin-left:50px;
+  padding:20px;
+  top:15%;
+  background-color:LightGrey;
+  border:solid DarkGrey;
+  border-radius:10px;
+  overflow-y: auto;
+  overflow-x:hidden;
+
+}
+
+.room_button{
+  width:100%;
+  margin:5px;
+}
+
+.msg_div{
+  background-color: LightGreen;
+  padding-left: 15px;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+  border-radius: 10px;
+  width:100%;
+}

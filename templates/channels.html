@@ -3,177 +3,113 @@
 <head>
 	<title>Flack - Channels</title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link rel="stylesheet" href="static/stylechannels.css">
 
 
 	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
 
 	<script>
-
-var room_list = ['cracatua'];
-var current_room = 'default';
-
-
-	document.addEventListener('DOMContentLoaded', ()=>{
-		var chatBox = document.querySelector('#ChatBox');
-		var roomselect = document.querySelector('#room_selection');
-		var socket=io.connect(location.protocol + '//' + document.domain + ':' + location.port);
-		socket.on('connect', ()=>{
-
-			socket.emit('ask_rooms');
+	var room_list = ['cracatua'];
+	var current_room = 'default';
 
 
-			document.querySelector('#button').onclick = () =>{
-				msg = document.querySelector('#input').value;
-				x2 = '{{x}}';
-				socket.emit('send_message', {'mensagem' : msg, 'user' : x2, 'current_room' : current_room});
-				document.querySelector('#input').value = '';
-				return false;
-			};
+		document.addEventListener('DOMContentLoaded', ()=>{
+			var chatBox = document.querySelector('#ChatBox');
+			var roomselect = document.querySelector('#room_selection');
+			var socket=io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+			socket.on('connect', ()=>{
 
-			document.querySelector('#create_room form #create_room_button').onclick = () =>{
-				room_name = document.querySelector('#create_room form #create_room_name').value;
-				if (room_list.includes(room_name)){
-					alert('error: Room already exists');
+				socket.emit('ask_rooms');
+
+
+				document.querySelector('#button').onclick = () =>{
+					msg = document.querySelector('#input').value;
+					x2 = "{{x}}";
+					socket.emit('send_message', {'mensagem' : msg, 'user' : x2, 'current_room' : current_room});
+					document.querySelector('#input').value = '';
 					return false;
-				}
-				else{
-					rooml = current_room;
-					current_room = room_name;
-					socket.emit('create_room', {'room_name' : room_name, 'rooml' : rooml});
-					document.querySelector('#create_room form #create_room_name').value = '';
-					return false;
-				}
-			};
-		});
+				};
 
-		socket.on('passing_rooms', data=>{
-			var i;
-			for (i=0; i<data.rooms.length; i++){
-				room_name = data.rooms[i];
+				document.querySelector('#create_room form #create_room_button').onclick = () =>{
+					room_name = document.querySelector('#create_room form #create_room_name').value;
+					if (room_list.includes(room_name)){
+						alert('error: Room already exists');
+						return false;
+					}
+					else{
+						rooml = current_room;
+						current_room = room_name;
+						socket.emit('create_room', {'room_name' : room_name, 'rooml' : rooml});
+						document.querySelector('#create_room form #create_room_name').value = '';
+						return false;
+					}
+				};
+			});
+
+			socket.on('passing_rooms', data=>{
+				var i;
+				for (i=0; i<data.rooms.length; i++){
+					room_name = data.rooms[i];
+					room_list.push(room_name);
+					const button = document.createElement('button');
+					button.innerHTML = data.rooms[i];
+					button.setAttribute("class", "room_button");
+					button.setAttribute("type", "submit");
+					document.querySelector('#room_selection').appendChild(button);
+					socket.emit('button_ask')
+				}
+
+			});
+
+			socket.on('button_functionality', ()=>{
+				console.log('running0');
+				if (document.querySelectorAll('.room_button').length > 0){
+							console.log('running');
+							document.querySelectorAll('.room_button').forEach(function(button){
+								console.log('running2');
+									button.onclick = ()=>{
+										room = button.innerHTML;
+										rooml = current_room;
+										console.log('running3');
+											socket.emit('join_room', {'room' : room, 'rooml' : rooml});
+											current_room = room;
+											return false;
+						}
+					})
+				}});
+
+			socket.on('broadcast_new_room', data => {
+				room_name = data.room_name;
 				room_list.push(room_name);
 				const button = document.createElement('button');
-				button.innerHTML = data.rooms[i];
-				button.setAttribute("class", "room_button");
-				button.setAttribute("type", "submit");
+				button.innerHTML = data.room_name;
+				button.setAttribute("class", "room_button")
 				document.querySelector('#room_selection').appendChild(button);
-				socket.emit('button_ask')
-			}
+				roomselect.scrollTop = roomselect.scrollHeight;
+				socket.emit('button_ask');
+			});
 
+			socket.on('broadcast_message', data =>{
+				const div = document.createElement('div');
+				const h = document.createElement('h4');
+				const line = document.createElement('br');
+				const msg = document.createElement("p");
+				//const time = document.createElement("p");
+				h.innerHTML = data.user;
+				msg.innerHTML = data.mensagem;
+				//time.innerHTML = data.time;
+				div.appendChild(h);
+				div.appendChild(msg);
+				//div.appendChild(time);
+				div.setAttribute("class", "msg_div");
+				document.querySelector('#ChatBox').appendChild(div);
+				chatBox.scrollTop = chatBox.scrollHeight;
+			});
 		});
-
-		socket.on('button_functionality', ()=>{
-			console.log('running0');
-			if (document.querySelectorAll('.room_button').length > 0){
-						console.log('running');
-						document.querySelectorAll('.room_button').forEach(function(button){
-							console.log('running2');
-								button.onclick = ()=>{
-									room = button.innerHTML;
-									rooml = current_room;
-									console.log('running3');
-										socket.emit('join_room', {'room' : room, 'rooml' : rooml});
-										current_room = room;
-										return false;
-					}
-				})
-			}});
-
-		socket.on('broadcast_new_room', data => {
-			room_name = data.room_name;
-			room_list.push(room_name);
-			const button = document.createElement('button');
-			button.innerHTML = data.room_name;
-			button.setAttribute("class", "room_button")
-			document.querySelector('#room_selection').appendChild(button);
-			roomselect.scrollTop = roomselect.scrollHeight;
-			socket.emit('button_ask');
-		});
-
-		socket.on('broadcast_message', data =>{
-			const div = document.createElement('div');
-			div.innerHTML = data.user +'--'+ data.mensagem;
-			div.setAttribute("class", "msg_div");
-			document.querySelector('#ChatBox').appendChild(div);
-			chatBox.scrollTop = chatBox.scrollHeight;
-		});
-	});
+</script>
 
 
-	</script>
 
-	<style>
-		#ChatBox{
-			position:absolute;
-			left:30%;
-			transform:translateX(-50%);
-			top:15%;
-			width:40%;
-			height:65%;
-			background-color:LightGrey;
-			border:solid DarkGrey;
-			z-index:1;
-			margin-right:50px;
-			padding:20px;
-			overflow-y: auto;
-			overflow-x: inherit;
-		}
-
-		#input{
-			position:absolute;
-			left:30%;
-			transform:translateX(-50%);
-			width:40%;
-			top:83%;
-			z-index:2;
-			margin-right:50px;
-		}
-		#button{
-			position:absolute;
-			left:30%;
-			transform:translateX(-50%);
-			top:87%;
-		}
-		#Hi{
-			position:absolute;
-			left:0;
-			top:0;
-			margin:20px;
-		}
-
-		#create_room{
-			position:absolute;
-			left:50%;
-			top:75%;
-			margin:30px;
-			padding:20px;
-		}
-
-		#room_selection{
-			position:absolute;
-			width:20%;
-			height:65%;
-			left: 50%;
-			margin-left:50px;
-			padding:20px;
-			top:15%;
-			background-color:LightGrey;
-			overflow-y: auto;
-			overflow-x:hidden;
-
-		}
-
-		.room_button{
-			width:100%;
-			margin:5px;
-		}
-
-		.msg_div{
-			background-color: white;
-			margin-bottom: 5px;
-			width:100%;
-
-		}
-	</style>
 </head>
 <body>
 	<ul class="nav justify-content-end">
