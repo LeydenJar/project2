@@ -1,6 +1,7 @@
 import os
 
 import datetime
+from time import strftime
 from flask import Flask, render_template, request, redirect, session
 from flask_socketio import SocketIO, emit, join_room, leave_room, rooms
 from flask_session import Session
@@ -66,10 +67,11 @@ def message(msg):
 	mensagem = msg["mensagem"]
 	user = msg["user"]
 	room = msg["current_room"]
+	#x = strftime()
 	#print("Cheguei ate aqui", file=sys.stderr)
-	#time = str(datetime.datetime.hour()+":"+datetime.datetime.minute())
-	#print(time, file=sys.stderr)
-	emit('broadcast_message', {'mensagem' : mensagem, 'user' : user}, room=room)
+	time = strftime("%H:%M")
+	#print(datetime.datetime.now.hour, file=sys.stderr)
+	emit('broadcast_message', {'mensagem' : mensagem, 'user' : user, "time" : time}, room=room)
 
 @socketio.on('create_room')
 def create_room(data):

@@ -1,5 +1,6 @@
 var room_list = ['cracatua'];
 var current_room = 'default';
+//var now = new Date;
 
 
 	document.addEventListener('DOMContentLoaded', ()=>{
@@ -14,6 +15,7 @@ var current_room = 'default';
 			document.querySelector('#button').onclick = () =>{
 				msg = document.querySelector('#input').value;
 				x2 = nome_user;
+				//time = now.getHours() +":"+ now.getMinutes()
 				socket.emit('send_message', {'mensagem' : msg, 'user' : x2, 'current_room' : current_room});
 				document.querySelector('#input').value = '';
 				return false;
@@ -83,10 +85,16 @@ var current_room = 'default';
 			const h = document.createElement('h4');
 			const line = document.createElement('br');
 			const msg = document.createElement("p");
+			const timediv = document.createElement("div");
+			const time = document.createElement("p");
 			h.innerHTML = data.user;
 			msg.innerHTML = data.mensagem;
+			time.innerHTML = data.time;
+			timediv.setAttribute("class", "timestamp");
+			timediv.appendChild(time);
 			div.appendChild(h);
 			div.appendChild(msg);
+			div.appendChild(timediv);
 			div.setAttribute("class", "msg_div");
 			document.querySelector('#ChatBox').appendChild(div);
 			chatBox.scrollTop = chatBox.scrollHeight;
