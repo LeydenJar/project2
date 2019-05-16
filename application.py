@@ -19,7 +19,7 @@ Session(app)
 now = datetime.datetime.now()
 rooms = ['pixirica', 'arruai']
 users = []
-
+#error_handle = ''
 
 
 class newUser(object):
@@ -30,9 +30,14 @@ class newUser(object):
 		print(rooms[0], file=sys.stderr)
 		users.append(self)
 
+	def __eq__(self, other):
+		return self.name == other.name
+
 	def logout(self):
-		#users.remove(self)
 		session["user"] = None
+		for i in users:
+			if  self.__eq__(i):
+				users.remove(i)
 		del self
 
 
@@ -80,6 +85,7 @@ def canais():
 			session["user"] = newUser(candidate_to_user, strftime("%H:%M"))
 			return render_template('channels.html', x=session["user"].name)
 		else:
+			#error_handle = 'Username is in use'
 			return redirect('/')
 		
 
