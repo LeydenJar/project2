@@ -11,6 +11,19 @@ var current_room = 'default';
 
 			socket.emit('ask_rooms');
 
+			document.querySelector("#input").onkeypress = (e) =>{
+			 if (e.keyCode !== 13) {
+      		  document.querySelector("#input").value += (e.key);
+ 			   }
+ 			 else{
+ 			 	msg = document.querySelector('#input').value;
+				x2 = nome_user;
+				//time = now.getHours() +":"+ now.getMinutes()
+				socket.emit('send_message', {'mensagem' : msg, 'user' : x2, 'current_room' : current_room});
+				document.querySelector('#input').value = '';
+ 			 }
+				return false;
+			};
 
 			document.querySelector('#button').onclick = () =>{
 				msg = document.querySelector('#input').value;
