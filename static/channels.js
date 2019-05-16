@@ -2,6 +2,9 @@ var room_list = ['cracatua'];
 var current_room = localStorage.getItem("current_room");
 
 
+	
+	
+
 	document.addEventListener('DOMContentLoaded', ()=>{
 		var chatBox = document.querySelector('#ChatBox');
 		var roomselect = document.querySelector('#room_selection');
@@ -11,6 +14,7 @@ var current_room = localStorage.getItem("current_room");
 
 		
 			socket.emit('ask_rooms');
+
 
 			console.log(localStorage.getItem("current_room"));
 			if(localStorage.getItem("current_room") !== null){
@@ -63,6 +67,11 @@ var current_room = localStorage.getItem("current_room");
 				}
 			};
 		});
+
+			
+			setInterval(function(){
+			socket.emit("heartbeat")
+		},10000);
 
 		socket.on('passing_rooms', data=>{
 			var i;
@@ -130,4 +139,9 @@ var current_room = localStorage.getItem("current_room");
 			document.querySelector('#ChatBox').appendChild(div);
 			chatBox.scrollTop = chatBox.scrollHeight;
 		});
+
+	
+		/*document.querySelector('#ChatBox').onbeforeunload = função(){
+				alert("works");
+			};*/
 	});

@@ -18,6 +18,22 @@ Session(app)
 
 now = datetime.datetime.now()
 rooms = ['pixirica', 'arruai']
+users = []
+
+
+
+class newUser(object):
+
+	def __init__(self, name, last_beat):
+		self.name = name
+		self.last_beat = last_beat
+		session["user"] = name
+		users.append(self)
+
+	def logout(self, name):
+		users.remove(self)
+		session["user"] = None
+		del self
 
 
 def getlog():
@@ -26,6 +42,19 @@ def getlog():
 	except:
 		u = None
 	return u
+
+def adduser(user):
+	if user not in users:
+	#	user = newUser(user, strftime("%H:%M"))
+		users.append(user)
+		v=user
+	else:
+		session["user"] = None
+		v=None
+	for i in range(0, len(users)):
+		print(users[i], file=sys.stderr)
+	return v
+
 
 
 @app.route("/")
@@ -45,13 +74,24 @@ def canais():
 		if u == None:
 			return redirect('/')
 		else:
-			return render_template('channels.html', x=session['user'])
+			v = adduser(session['user'])
+			if v == None:
+				return redirect('/')
+			else:
+				return render_template('channels.html', x=v)
 	else:
 		session['user'] = request.form.get('user')
-		return render_template('channels.html', x=session['user'])
+		v = adduser(session['user'])
+		if v == None:
+			return render_template('home.html', error="User already in use")
+		else:
+			return render_template('channels.html', x=v)
+		
 
 @app.route("/logout")
 def logout():
+	user = session['user']
+	users.remove(user)
 	session['user']=None
 	return redirect('/')
 
@@ -97,6 +137,11 @@ def join(data):
 def butt():
 	emit('button_functionality')
 
+@socketio.on('heartbeat')
+def heart():
+
+	session['last_beat'] = strftime("%H:%M")
+	print(session['last_beat'], file=sys.stderr)
 
 if __name__ == "__main__":
 	socketio.run(app, debug=True)
