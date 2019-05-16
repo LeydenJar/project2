@@ -27,33 +27,30 @@ class newUser(object):
 	def __init__(self, name, last_beat):
 		self.name = name
 		self.last_beat = last_beat
-		session["user"] = name
+		print(rooms[0], file=sys.stderr)
 		users.append(self)
 
-	def logout(self, name):
-		users.remove(self)
+	def logout(self):
+		#users.remove(self)
 		session["user"] = None
 		del self
 
 
 def getlog():
 	try:
-		u = session["user"]
+		u = session["user"].name
 	except:
 		u = None
 	return u
 
-def adduser(user):
-	if user not in users:
-	#	user = newUser(user, strftime("%H:%M"))
-		users.append(user)
-		v=user
-	else:
-		session["user"] = None
-		v=None
-	for i in range(0, len(users)):
-		print(users[i], file=sys.stderr)
-	return v
+def check_avaliability(name):
+	a = True
+	for i in users:
+		if i.name == name:
+			a = False
+	return a
+			
+
 
 
 
@@ -74,30 +71,25 @@ def canais():
 		if u == None:
 			return redirect('/')
 		else:
-			v = adduser(session['user'])
-			if v == None:
-				return redirect('/')
-			else:
-				return render_template('channels.html', x=v)
+			return render_template('channels.html', x=u)
+		
 	else:
-		session['user'] = request.form.get('user')
-		v = adduser(session['user'])
-		if v == None:
-			return render_template('home.html', error="User already in use")
+		candidate_to_user = request.form.get('user')
+		avaliability = check_avaliability(candidate_to_user)
+		if avaliability == True:
+			session["user"] = newUser(candidate_to_user, strftime("%H:%M"))
+			return render_template('channels.html', x=session["user"].name)
 		else:
-			return render_template('channels.html', x=v)
+			return redirect('/')
 		
 
 @app.route("/logout")
 def logout():
-	user = session['user']
-	users.remove(user)
-	session['user']=None
+	session['user'].logout()
 	return redirect('/')
 
 @socketio.on('ask_rooms')
 def pass_rooms():
-	print('**********I am starting the function ASKROOMS**************', file=sys.stderr)
 	r = rooms
 	emit('passing_rooms', {'rooms':r})
 
@@ -106,10 +98,7 @@ def message(msg):
 	mensagem = msg["mensagem"]
 	user = msg["user"]
 	room = msg["current_room"]
-	#x = strftime()
-	#print("Cheguei ate aqui", file=sys.stderr)
 	time = strftime("%H:%M")
-	#print(datetime.datetime.now.hour, file=sys.stderr)
 	emit('broadcast_message', {'mensagem' : mensagem, 'user' : user, "time" : time}, room=room)
 
 @socketio.on('create_room')
@@ -124,11 +113,9 @@ def create_room(data):
 
 @socketio.on('join_room')
 def join(data):
-	print('**********im starting the function join_room**************', file=sys.stderr)
 	room = data['room']
 	rooml = data['rooml']
 	join_room(room)
-	print("****************Runing Serverside*************", file=sys.stderr)
 	if rooml is not None:
 		leave_room(rooml)
 
@@ -139,9 +126,8 @@ def butt():
 
 @socketio.on('heartbeat')
 def heart():
-
-	session['last_beat'] = strftime("%H:%M")
-	print(session['last_beat'], file=sys.stderr)
+	session['user'].last_beat = strftime("%H:%M")
+	print(session['user'].last_beat, file=sys.stderr)
 
 if __name__ == "__main__":
 	socketio.run(app, debug=True)
