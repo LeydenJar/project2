@@ -40,7 +40,6 @@ def index():
 
 @app.route("/channels", methods=['POST', 'GET'])
 def canais():
-	print('I am starting the function', file=sys.stderr)
 	if request.method=='GET':
 		u = getlog()
 		if u == None:
@@ -88,8 +87,8 @@ def join(data):
 	print('**********im starting the function join_room**************', file=sys.stderr)
 	room = data['room']
 	rooml = data['rooml']
-	print(room,  file=sys.stderr)
 	join_room(room)
+	print("****************Runing Serverside*************", file=sys.stderr)
 	if rooml is not None:
 		leave_room(rooml)
 

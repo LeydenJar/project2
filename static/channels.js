@@ -1,6 +1,5 @@
 var room_list = ['cracatua'];
-var current_room = 'default';
-//var now = new Date;
+var current_room = localStorage.getItem("current_room");
 
 
 	document.addEventListener('DOMContentLoaded', ()=>{
@@ -9,7 +8,18 @@ var current_room = 'default';
 		var socket=io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 		socket.on('connect', ()=>{
 
+
+		
 			socket.emit('ask_rooms');
+
+			console.log(localStorage.getItem("current_room"));
+			if(localStorage.getItem("current_room") !== null){
+				console.log("running this");
+				var abcde = "qualquer coisa";
+				var abcd = localStorage.getItem("current_room");
+				socket.emit("join_room", {"room" : abcd, "rooml" : abcde});
+
+			}
 
 			document.querySelector("#input").onkeypress = (e) =>{
 			 if (e.keyCode !== 13) {
@@ -19,7 +29,7 @@ var current_room = 'default';
  			 	msg = document.querySelector('#input').value;
 				x2 = nome_user;
 				//time = now.getHours() +":"+ now.getMinutes()
-				socket.emit('send_message', {'mensagem' : msg, 'user' : x2, 'current_room' : current_room});
+				socket.emit('send_message', {'mensagem' : msg, 'user' : x2, 'current_room' : localStorage.getItem("current_room")});
 				document.querySelector('#input').value = '';
  			 }
 				return false;
@@ -29,7 +39,7 @@ var current_room = 'default';
 				msg = document.querySelector('#input').value;
 				x2 = nome_user;
 				//time = now.getHours() +":"+ now.getMinutes()
-				socket.emit('send_message', {'mensagem' : msg, 'user' : x2, 'current_room' : current_room});
+				socket.emit('send_message', {'mensagem' : msg, 'user' : x2, 'current_room' :  localStorage.getItem("current_room")});
 				document.querySelector('#input').value = '';
 				return false;
 			};
@@ -41,9 +51,10 @@ var current_room = 'default';
 					return false;
 				}
 				else{
-					rooml = current_room;
-					current_room = room_name;
+					rooml = localStorage.getItem("current_room");
+					//localStorage.setItem() = room_name;
 					socket.emit('create_room', {'room_name' : room_name, 'rooml' : rooml});
+					localStorage.setItem("current_room", room_name);
 					document.querySelector('#create_room form #create_room_name').value = '';
 					return false;
 				}
@@ -73,10 +84,11 @@ var current_room = 'default';
 							console.log('running2');
 								button.onclick = ()=>{
 									room = button.innerHTML;
-									rooml = current_room;
+									rooml = localStorage.getItem("current_room");
 									console.log('running3');
 										socket.emit('join_room', {'room' : room, 'rooml' : rooml});
-										current_room = room;
+										localStorage.setItem("current_room", room);
+										//current_room = room;
 										return false;
 					}
 				})
