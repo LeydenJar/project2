@@ -17,13 +17,14 @@ var current_room = localStorage.getItem("current_room");
 
 
 			console.log(localStorage.getItem("current_room"));
-			if(localStorage.getItem("current_room") !== null){
+/*			if(localStorage.getItem("current_room") !== null){
 				console.log("running this");
 				var abcde = "qualquer coisa";
 				var abcd = localStorage.getItem("current_room");
 				socket.emit("join_room", {"room" : abcd, "rooml" : abcde});
 
 			}
+*/
 
 			document.querySelector("#input").onkeypress = (e) =>{
 			 if (e.keyCode !== 13) {
@@ -47,6 +48,8 @@ var current_room = localStorage.getItem("current_room");
 				document.querySelector('#input').value = '';
 				return false;
 			};
+
+			//**************************************************************************************//
 
 			document.querySelector('#create_room form #create_room_button').onclick = () =>{
 				room_name = document.querySelector('#create_room form #create_room_name').value;

@@ -1,7 +1,8 @@
 import os
 
 import datetime
-from time import strftime
+import time, threading
+from time import strftime, strptime
 from flask import Flask, render_template, request, redirect, session
 from flask_socketio import SocketIO, emit, join_room, leave_room, rooms
 from flask_session import Session
@@ -16,18 +17,59 @@ app.config["SESSION_TYPE"] = "filesystem"
 
 Session(app)
 
-now = datetime.datetime.now()
-rooms = ['pixirica', 'arruai']
+
+rooms = []
 users = []
-#error_handle = ''
+
+class new_Message(object):
+	def __init__(self, user, content, timestamp, channel):
+		if channel == None:
+			return false
+		self.user = user
+		self.content = content
+		self.timestamp = timestamp
+		self.channel = channel
+		if len(channel.messages) == 100 or len(channel.messages) > 100:
+			del channel.messages[0]
+		channel.messages.append(self)
+
+
+class newRoom(object):
+	def __init__(self, name, prev_Room, user1):
+		self.name = name
+		self.messages = []
+		self.users = [user1]
+		self.member_count = 1
+		leave_room(prev_Room)
+		if session["user"].current_room is not None:
+			session["user"].current_room.users.remove(session["user"].name)
+			session["user"].current_room.member_count -= 1
+		join_room(name)
+		session["user"].current_room = self
+		rooms.append(self)
+
+	def change(self, new_room, old_room):
+		if old_room is not None:
+			leave_room(old_room)
+		self.users.remove(session["user"].name)
+		self.member_cont -=1
+		join_room(new_room)
+		for i in rooms:
+			if i.name == new_room:
+				session["user"].current_room = i
+		session["user"].current_room.users.append(session["user"].name)
+		session["user"].current_room.member_count += 1
+
+		
+
+
 
 
 class newUser(object):
-
 	def __init__(self, name, last_beat):
 		self.name = name
 		self.last_beat = last_beat
-		print(rooms[0], file=sys.stderr)
+		self.current_room = None
 		users.append(self)
 
 	def __eq__(self, other):
@@ -40,10 +82,22 @@ class newUser(object):
 				users.remove(i)
 		del self
 
+def clean_users():
+	print("starting the function clean_users")
+	now = time.time()
+	for i in users:
+		if now - i.last_beat > 60:
+			print("removed " + i.name, file=sys.stderr)
+			users.remove(i)
+	threading.Timer(60, clean_users).start()
+	print("Ending the function Clean_Users", file=sys.stderr)
 
 def getlog():
 	try:
-		u = session["user"].name
+		u=None
+		for i in users:
+			if session["user"].__eq__(i):
+				u = session["user"].name
 	except:
 		u = None
 	return u
@@ -58,6 +112,7 @@ def check_avaliability(name):
 
 
 
+#********************************.Routes and socket comunications.**************************************
 
 @app.route("/")
 def index():
@@ -69,8 +124,11 @@ def index():
 
 
 
+clean_users()
+
 @app.route("/channels", methods=['POST', 'GET'])
 def canais():
+
 	if request.method=='GET':
 		u = getlog()
 		if u == None:
@@ -82,10 +140,9 @@ def canais():
 		candidate_to_user = request.form.get('user')
 		avaliability = check_avaliability(candidate_to_user)
 		if avaliability == True:
-			session["user"] = newUser(candidate_to_user, strftime("%H:%M"))
+			session["user"] = newUser(candidate_to_user, time.time())
 			return render_template('channels.html', x=session["user"].name)
 		else:
-			#error_handle = 'Username is in use'
 			return redirect('/')
 		
 
@@ -96,34 +153,60 @@ def logout():
 
 @socketio.on('ask_rooms')
 def pass_rooms():
-	r = rooms
+	r = []
+	for i in rooms:
+		r.append(i.name)
 	emit('passing_rooms', {'rooms':r})
 
 @socketio.on('send_message')
 def message(msg):
+	print("Hey, i am trying to send that message you sent!", file=sys.stderr)
 	mensagem = msg["mensagem"]
 	user = msg["user"]
-	room = msg["current_room"]
+	room = session["user"].current_room
 	time = strftime("%H:%M")
-	emit('broadcast_message', {'mensagem' : mensagem, 'user' : user, "time" : time}, room=room)
+	if room == None:
+		print("I dont find the room", file=sys.stderr)
+		return false
+	m = new_Message(user, mensagem, time, room)
+	print("i am about to emit a message to" + m.channel.name, file=sys.stderr)
+	emit('broadcast_message', {'mensagem' : m.content, 'user' : m.user, "time" : m.timestamp}, room=m.channel.name)
 
 @socketio.on('create_room')
 def create_room(data):
+	print("******************Just Got Here", file=sys.stderr)
 	room_name = str(data["room_name"])
 	rooml = data['rooml']
-	rooms.append(room_name)
-	leave_room(rooml)
-	join_room(room_name)
+	print(room_name + "   " + rooml ,file=sys.stderr)
+	n = newRoom(room_name, rooml, session["user"].name)
+	#rooms.append(room_name)
+	#leave_room(rooml)
+	#join_room(room_name)
 	emit('broadcast_new_room', {'room_name' : room_name}, broadcast=True)
 
 
 @socketio.on('join_room')
 def join(data):
-	room = data['room']
-	rooml = data['rooml']
-	join_room(room)
-	if rooml is not None:
-		leave_room(rooml)
+	new_room = data['room']
+	old_room = session["user"].current_room
+
+	#session["user"].current_room.change(new_room, old_room)
+	if old_room is not None:
+		leave_room(old_room)
+	old_room.users.remove(session["user"].name)
+	old_room.member_count -=1
+	join_room(new_room)
+	for i in rooms:
+		if i.name == new_room:
+			session["user"].current_room = i
+	session["user"].current_room.users.append(session["user"].name)
+	session["user"].current_room.member_count += 1
+
+	#old_room = data['rooml']
+
+	#join_room(room)
+	#if rooml is not None:
+	#	leave_room(rooml)
 
 
 @socketio.on('button_ask')
@@ -132,8 +215,8 @@ def butt():
 
 @socketio.on('heartbeat')
 def heart():
-	session['user'].last_beat = strftime("%H:%M")
-	print(session['user'].last_beat, file=sys.stderr)
+	session['user'].last_beat = time.time()
+	print(session["user"].name + " --  HeartBeat --" + str(session['user'].last_beat), file=sys.stderr)
 
 if __name__ == "__main__":
 	socketio.run(app, debug=True)
