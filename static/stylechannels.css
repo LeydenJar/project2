@@ -90,6 +90,14 @@
 
   font-size: 1em;
 }
+
+.userlistContainer{
+  background-color:#335c98;
+  position: absolute;
+  width: 20%;
+  left: 80%;
+  top: 15%;
+}
 @media only screen and(max-width :; 600px){
 
   .timestamp > p{

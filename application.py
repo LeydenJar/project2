@@ -161,10 +161,10 @@ def message(msg):
 	mensagem = msg["mensagem"]
 	user = msg["user"]
 	room = session["user"].current_room
+	#room=msg["current_room"]
 	time = strftime("%H:%M")
 	if room == None:
 		print("I dont find the room", file=sys.stderr)
-		return false
 	m = new_Message(user, mensagem, time, room)
 	print("i am about to emit a message to" + m.channel.name, file=sys.stderr)
 	emit('broadcast_message', {'mensagem' : m.content, 'user' : m.user, "time" : m.timestamp}, room=m.channel.name)
@@ -185,17 +185,26 @@ def create_room(data):
 @socketio.on('join_room')
 def join(data):
 	new_room = data['room']
-	old_room = session["user"].current_room
-
+	try:
+		old_room = session["user"].current_room
+	except:
+		old_room = None
+	print("i am trying to put you in the room", file=sys.stderr)
 	#session["user"].current_room.change(new_room, old_room)
 	if old_room is not None:
 		leave_room(old_room)
-	old_room.users.remove(session["user"].name)
-	old_room.member_count -=1
-	join_room(new_room)
+		old_room.users.remove(session["user"].name)
+		old_room.member_count -=1
+	
+	i = None
 	for i in rooms:
+		print("testing the room" + i.name, file=sys.stderr)
 		if i.name == new_room:
+			print("found your room", file = sys.stderr)
 			session["user"].current_room = i
+			break
+	session["user"].current_room = i
+	join_room(new_room)
 	session["user"].current_room.users.append(session["user"].name)
 	session["user"].current_room.member_count += 1
 
