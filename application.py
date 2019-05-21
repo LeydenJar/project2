@@ -60,10 +60,6 @@ class newRoom(object):
 		session["user"].current_room.users.append(session["user"].name)
 		session["user"].current_room.member_count += 1
 
-		
-
-
-
 
 class newUser(object):
 	def __init__(self, name, last_beat):
@@ -81,6 +77,7 @@ class newUser(object):
 			if  self.__eq__(i):
 				users.remove(i)
 		del self
+
 
 def clean_users():
 	print("starting the function clean_users")
@@ -202,6 +199,8 @@ def join(data):
 	session["user"].current_room.users.append(session["user"].name)
 	session["user"].current_room.member_count += 1
 
+	for i in session["user"].current_room.messages:
+		emit('broadcast_message', {'mensagem' : i.content, 'user' : i.user, "time" : i.timestamp})
 	#old_room = data['rooml']
 
 	#join_room(room)
@@ -217,6 +216,20 @@ def butt():
 def heart():
 	session['user'].last_beat = time.time()
 	print(session["user"].name + " --  HeartBeat --" + str(session['user'].last_beat), file=sys.stderr)
+
+
+@socketio.on("askRoomUsers")
+def askRoomUsers(data):
+	print("I am getting here", file=sys.stderr)
+	room = data["room"]
+	roomUsers = []
+	for i in rooms:
+		if i.name == room:
+			roomUsers = i.users
+			emit('roomUsers', {"roomUsers" : roomUsers})
+			for s in roomUsers:
+				print(s, file=sys.stderr)
+
 
 if __name__ == "__main__":
 	socketio.run(app, debug=True)

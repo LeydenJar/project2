@@ -9,6 +9,7 @@ var current_room = localStorage.getItem("current_room");
 		var chatBox = document.querySelector('#ChatBox');
 		var roomselect = document.querySelector('#room_selection');
 		var socket=io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+		var message_counter = 0;
 		socket.on('connect', ()=>{
 
 
@@ -60,8 +61,19 @@ var current_room = localStorage.getItem("current_room");
 				else{
 					rooml = localStorage.getItem("current_room");
 					//localStorage.setItem() = room_name;
+
+					var node = document.querySelector("#ChatBox");
+						while(node.firstChild){
+							node.removeChild(node.firstChild);
+							if (message_counter !== 0){
+								message_counter --;
+								}
+							console.log(message_counter);
+							}
+
+
 					socket.emit('create_room', {'room_name' : room_name, 'rooml' : rooml});
-					msg = "You've created the room " + room_name;
+					msg = "Genesis of the room " + room_name;
 					user = "system";
 					socket.emit('send_message', {"mensagem" : msg, "user" : user, "current_room" : room_name});
 					localStorage.setItem("current_room", room_name);
@@ -92,24 +104,61 @@ var current_room = localStorage.getItem("current_room");
 		});
 
 		socket.on('button_functionality', ()=>{
-			console.log('running0');
 			if (document.querySelectorAll('.room_button').length > 0){
-						console.log('running');
 						document.querySelectorAll('.room_button').forEach(function(button){
-							console.log('running2');
 								button.onclick = ()=>{
 									room = button.innerHTML;
 									rooml = localStorage.getItem("current_room");
-									console.log('running3');
+										var node = document.querySelector("#ChatBox");
+										while(node.firstChild){
+											node.removeChild(node.firstChild);
+											if (message_counter !== 0){
+												message_counter --;
+											}
+											console.log(message_counter);
+										}
 										socket.emit('join_room', {'room' : room, 'rooml' : rooml});
 										localStorage.setItem("current_room", room);
-										msg = "Welcome to the room " + room;
+										msg = "Batman has joined the room!";
 										user = "system";
 										socket.emit('send_message', {"mensagem" : msg, "user" : user, "current_room" : room});
 										//current_room = room;
 										return false;
 					}
-				})
+								button.onmouseenter = ()=>{
+									room = button.innerHTML;
+									const userlistContainer = document.createElement("div");
+									userlistContainer.setAttribute("class", "userlistContainer");
+									var usernames = document.createElement("p");
+
+									socket.emit('askRoomUsers', {"room" : room});
+
+
+									socket.on('roomUsers', data=>{
+										var i = 0;
+										while (data.roomUsers[i]){
+											usernames.innerHTML +=  data.roomUsers[i] + "<br>";
+											i++;
+										}
+									});
+
+
+									userlistContainer.appendChild(usernames);
+									document.querySelector('body').appendChild(userlistContainer);
+									return false;
+								}
+
+								button.onmouseleave = () =>{
+									var list = document.querySelector(".userlistContainer");
+									while(list.firstChild){
+										list.removeChild(list.firstChild);
+									}
+									list.parentNode.removeChild(list);
+									return false;
+
+
+								}
+				});
 			}});
 
 		socket.on('broadcast_new_room', data => {
@@ -124,6 +173,13 @@ var current_room = localStorage.getItem("current_room");
 		});
 
 		socket.on('broadcast_message', data =>{
+			if(message_counter == 100){
+				console.log("running inside");
+				var element = document.querySelector(".msg_div");
+				element.parentNode.removeChild(element);
+				message_counter --;
+			}
+			console.log("running outside");
 			const div = document.createElement('div');
 			const h = document.createElement('h4');
 			const line = document.createElement('br');
@@ -140,11 +196,18 @@ var current_room = localStorage.getItem("current_room");
 			div.appendChild(timediv);
 			div.setAttribute("class", "msg_div");
 			document.querySelector('#ChatBox').appendChild(div);
+			message_counter ++;
 			chatBox.scrollTop = chatBox.scrollHeight;
 		});
 
-	
-		/*document.querySelector('#ChatBox').onbeforeunload = função(){
+		
+		/*socket.on('getMessages', data =>{
+
+
+
+
+		});
+		document.querySelector('#ChatBox').onbeforeunload = função(){
 				alert("works");
 			};*/
 	});
