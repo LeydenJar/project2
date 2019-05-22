@@ -25,7 +25,7 @@ var current_room = localStorage.getItem("current_room");
 				socket.emit("join_room", {"room" : abcd, "rooml" : abcde});
 
 			}
-*/
+*/	
 
 			document.querySelector("#input").onkeypress = (e) =>{
 			 if (e.keyCode !== 13) {
@@ -200,13 +200,28 @@ var current_room = localStorage.getItem("current_room");
 			chatBox.scrollTop = chatBox.scrollHeight;
 		});
 
+
+		document.querySelector("body").onbeforeunload = function (){
+			current_room = localStorage.getItem("current_room");
+			socket.emit("logoff", {"current_room" : current_room});
+			window.location.href = 'http://127.0.0.1:5000/';
+			return false;
+		}
+		document.querySelector("#logout").onclick = function(){
+			current_room = localStorage.getItem("current_room");
+			socket.emit("logoff", {"current_room" : current_room});
+			window.location.href = 'http://127.0.0.1:5000/';
+			return false;
+		}
 		
-		/*socket.on('getMessages', data =>{
+		/*
+		socket.on('getMessages', data =>{
 
 
 
 
 		});
+
 		document.querySelector('#ChatBox').onbeforeunload = função(){
 				alert("works");
 			};*/

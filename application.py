@@ -24,7 +24,7 @@ users = []
 class new_Message(object):
 	def __init__(self, user, content, timestamp, channel):
 		if channel == None:
-			return false
+			print("the channel is none", file = sys.stderr)
 		self.user = user
 		self.content = content
 		self.timestamp = timestamp
@@ -41,14 +41,14 @@ class newRoom(object):
 		self.users = [user1]
 		self.member_count = 1
 		leave_room(prev_Room)
-		if session["user"].current_room is not None:
-			session["user"].current_room.users.remove(session["user"].name)
-			session["user"].current_room.member_count -= 1
+		if session['user'].current_room is not None:
+			session['user'].current_room.users.remove(session["user"].name)
+			session['user'].current_room.member_count -= 1
 		join_room(name)
-		session["user"].current_room = self
+		session['user'].current_room = self
 		rooms.append(self)
 
-	def change(self, new_room, old_room):
+"""def change(self, new_room, old_room):
 		if old_room is not None:
 			leave_room(old_room)
 		self.users.remove(session["user"].name)
@@ -59,6 +59,7 @@ class newRoom(object):
 				session["user"].current_room = i
 		session["user"].current_room.users.append(session["user"].name)
 		session["user"].current_room.member_count += 1
+		"""
 
 
 class newUser(object):
@@ -71,11 +72,11 @@ class newUser(object):
 	def __eq__(self, other):
 		return self.name == other.name
 
-	def logout(self):
-		session["user"] = None
+	def logoutU(self):
 		for i in users:
 			if  self.__eq__(i):
 				users.remove(i)
+		session["user"] = None
 		del self
 
 
@@ -85,8 +86,9 @@ def clean_users():
 	for i in users:
 		if now - i.last_beat > 60:
 			print("removed " + i.name, file=sys.stderr)
+			i.current_room.users.remove(i.name)
 			users.remove(i)
-	threading.Timer(60, clean_users).start()
+	threading.Timer(600, clean_users).start()
 	print("Ending the function Clean_Users", file=sys.stderr)
 
 def getlog():
@@ -137,17 +139,32 @@ def canais():
 		candidate_to_user = request.form.get('user')
 		avaliability = check_avaliability(candidate_to_user)
 		if avaliability == True:
-			session["user"] = newUser(candidate_to_user, time.time())
-			return render_template('channels.html', x=session["user"].name)
+			print("runned", file=sys.stderr)
+			session['user'] = newUser(candidate_to_user, time.time())
+			return render_template('channels.html', x=session['user'].name)
 		else:
 			return redirect('/')
 		
 
 @app.route("/logout")
 def logout():
-	session['user'].logout()
-	return redirect('/')
 
+	
+	print(session['user'].name, file = sys.stderr)
+	"""
+	try:
+		print(session['user'].current_room.name, file = sys.stderr)
+	except:
+		print("no room", file = sys.stderr)
+
+	for i in rooms:
+		if  i.name == session['user'].current_room.name:
+			i.users.remove(session["user"].name)
+
+
+	session['user'].logoutU()
+	return redirect('/')
+	"""
 @socketio.on('ask_rooms')
 def pass_rooms():
 	r = []
@@ -171,14 +188,11 @@ def message(msg):
 
 @socketio.on('create_room')
 def create_room(data):
-	print("******************Just Got Here", file=sys.stderr)
 	room_name = str(data["room_name"])
 	rooml = data['rooml']
 	print(room_name + "   " + rooml ,file=sys.stderr)
 	n = newRoom(room_name, rooml, session["user"].name)
-	#rooms.append(room_name)
-	#leave_room(rooml)
-	#join_room(room_name)
+	print(session['user'].current_room.name, file = sys.stderr)
 	emit('broadcast_new_room', {'room_name' : room_name}, broadcast=True)
 
 
@@ -189,32 +203,33 @@ def join(data):
 		old_room = session["user"].current_room
 	except:
 		old_room = None
-	print("i am trying to put you in the room", file=sys.stderr)
-	#session["user"].current_room.change(new_room, old_room)
-	if old_room is not None:
+
+	if old_room != None:
 		leave_room(old_room)
-		old_room.users.remove(session["user"].name)
+		old_room.users.remove(session['user'].name)
 		old_room.member_count -=1
 	
-	i = None
 	for i in rooms:
 		print("testing the room" + i.name, file=sys.stderr)
 		if i.name == new_room:
 			print("found your room", file = sys.stderr)
-			session["user"].current_room = i
+			session['user'].current_room = i
+			print("it is " + session["user"].current_room.name)
 			break
-	session["user"].current_room = i
+
+	print("continued after break", file = sys.stderr)
 	join_room(new_room)
 	session["user"].current_room.users.append(session["user"].name)
 	session["user"].current_room.member_count += 1
 
+	#enviando mensagens da sala
+
 	for i in session["user"].current_room.messages:
 		emit('broadcast_message', {'mensagem' : i.content, 'user' : i.user, "time" : i.timestamp})
-	#old_room = data['rooml']
+	print(session["user"].current_room.name, file = sys.stderr)
 
-	#join_room(room)
-	#if rooml is not None:
-	#	leave_room(rooml)
+
+
 
 
 @socketio.on('button_ask')
@@ -239,6 +254,14 @@ def askRoomUsers(data):
 			for s in roomUsers:
 				print(s, file=sys.stderr)
 
+@socketio.on("logoff")
+def logoff(data):
+	print("yes, i did logoff", file=sys.stderr)
+	for i in rooms:
+			if data["current_room"] == i.name:
+				i.users.remove(session["user"].name)
+	session['user'].logoutU()
+	return redirect("/")
 
 if __name__ == "__main__":
 	socketio.run(app, debug=True)

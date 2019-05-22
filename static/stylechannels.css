@@ -98,6 +98,11 @@
   left: 80%;
   top: 15%;
 }
+
+#Logout{
+  margin: 20px;
+
+}
 @media only screen and(max-width :; 600px){
 
   .timestamp > p{
