@@ -18,14 +18,7 @@ var current_room = localStorage.getItem("current_room");
 
 
 			console.log(localStorage.getItem("current_room"));
-/*			if(localStorage.getItem("current_room") !== null){
-				console.log("running this");
-				var abcde = "qualquer coisa";
-				var abcd = localStorage.getItem("current_room");
-				socket.emit("join_room", {"room" : abcd, "rooml" : abcde});
 
-			}
-*/	
 
 			document.querySelector("#input").onkeypress = (e) =>{
 			 if (e.keyCode !== 13) {
@@ -54,6 +47,11 @@ var current_room = localStorage.getItem("current_room");
 
 			document.querySelector('#create_room form #create_room_button').onclick = () =>{
 				room_name = document.querySelector('#create_room form #create_room_name').value;
+				if (room_name.length > 15){
+					alert("room names must have 15 or less chars");
+					return false
+
+				}
 				if (room_list.includes(room_name)){
 					alert('error: Room already exists');
 					return false;
@@ -214,15 +212,19 @@ var current_room = localStorage.getItem("current_room");
 			return false;
 		}
 		
-		/*
-		socket.on('getMessages', data =>{
+		socket.on("del_room", data=>{
+			var rtd = data.room;
+			var buttons = document.getElementsByClassName("room_button");
+			var n = buttons.length
+			for (var i=0; i < n; i++){
+				if (buttons[i].innerHTML == rtd){
+					buttons[i].parentNode.removeChild(buttons[i]);
+					break;
+				}
 
-
-
-
+			}
+			index = room_list.indexOf(rtd);
+			room_list.splice(index);
 		});
-
-		document.querySelector('#ChatBox').onbeforeunload = função(){
-				alert("works");
-			};*/
+			
 	});

@@ -18,18 +18,18 @@
 #input{
   position:absolute;
   left:30%;
-  transform:translateX(-50%);
-  width:40%;
   top:83%;
-  z-index:2;
-  margin-right:50px;
+  transform:translateX(-50%);
+  width:39.9%;
+  
+
 }
 
 #button{
   position:absolute;
   left:30%;
   transform:translateX(-50%);
-  top:87%;
+  top:90%;
 }
 #Hi{
   position:absolute;
@@ -77,11 +77,18 @@
   width:100%;
 }
 
+.msg_div > p{
+  word-wrap:break-word;
+
+
+
+}
+
 .timestamp{
   position: relative;
   width: 10%;
   left:85%;
-  background-color: Red;
+  background-color: Green;
   padding:1px;
 }
 
@@ -92,7 +99,7 @@
 }
 
 .userlistContainer{
-  background-color:#335c98;
+  background-color:LightGreen;
   position: absolute;
   width: 20%;
   left: 80%;

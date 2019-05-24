@@ -48,6 +48,14 @@ class newRoom(object):
 		session['user'].current_room = self
 		rooms.append(self)
 
+	def check_for_del(self):
+		if self.member_count == 0:
+			for i in rooms:
+				if i.name == self.name:
+					rooms.remove(i)
+			socket.emit("del_room", {"room" : self.name})
+			del self
+
 """def change(self, new_room, old_room):
 		if old_room is not None:
 			leave_room(old_room)
@@ -62,7 +70,7 @@ class newRoom(object):
 		"""
 
 
-class newUser(object):
+class new_User(object):
 	def __init__(self, name, last_beat):
 		self.name = name
 		self.last_beat = last_beat
@@ -140,7 +148,7 @@ def canais():
 		avaliability = check_avaliability(candidate_to_user)
 		if avaliability == True:
 			print("runned", file=sys.stderr)
-			session['user'] = newUser(candidate_to_user, time.time())
+			session['user'] = new_User(candidate_to_user, time.time())
 			return render_template('channels.html', x=session['user'].name)
 		else:
 			return redirect('/')
@@ -151,20 +159,7 @@ def logout():
 
 	
 	print(session['user'].name, file = sys.stderr)
-	"""
-	try:
-		print(session['user'].current_room.name, file = sys.stderr)
-	except:
-		print("no room", file = sys.stderr)
-
-	for i in rooms:
-		if  i.name == session['user'].current_room.name:
-			i.users.remove(session["user"].name)
-
-
-	session['user'].logoutU()
-	return redirect('/')
-	"""
+	
 @socketio.on('ask_rooms')
 def pass_rooms():
 	r = []
@@ -192,6 +187,9 @@ def create_room(data):
 	rooml = data['rooml']
 	print(room_name + "   " + rooml ,file=sys.stderr)
 	n = newRoom(room_name, rooml, session["user"].name)
+	"""for i in rooms:
+		if i.name == rooml:
+			i.check_for_del()"""
 	print(session['user'].current_room.name, file = sys.stderr)
 	emit('broadcast_new_room', {'room_name' : room_name}, broadcast=True)
 
@@ -208,6 +206,7 @@ def join(data):
 		leave_room(old_room)
 		old_room.users.remove(session['user'].name)
 		old_room.member_count -=1
+		old_room.check_for_del()
 	
 	for i in rooms:
 		print("testing the room" + i.name, file=sys.stderr)
