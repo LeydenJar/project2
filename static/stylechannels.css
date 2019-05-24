@@ -36,8 +36,8 @@
   left:0;
   top:0;
   margin:20px;
+  color:bisque;
 }
-
 #create_room{
   position:absolute;
   left:50%;
@@ -79,12 +79,10 @@
 
 .msg_div > p{
   word-wrap:break-word;
-
-
-
 }
 
 .timestamp{
+  border-radius: 5px;
   position: relative;
   width: 10%;
   left:85%;
@@ -99,20 +97,36 @@
 }
 
 .userlistContainer{
-  background-color:LightGreen;
+  background-color:LightGrey;
   position: absolute;
+  margin-top:1%;
+  border-radius: 10px;
   width: 20%;
-  left: 80%;
-  top: 15%;
+  left: 75%;
+  top: 50%;
 }
 
-#Logout{
+#logout{
+  position:relative;
+  left:90%;
+  width:auto;
   margin: 20px;
 
 }
-@media only screen and(max-width :; 600px){
 
-  .timestamp > p{
-    font-size: 0.5em;
-  }
+
+#theme_selection{
+  position:absolute;
+  background-color:LightGrey;
+  top:15%;
+  width:20%;
+  left:75%;
+  border-radius:12px;
+
+  
+}
+.theme{
+  width:-webkit-fill-available;
+  margin-bottom: 7%;
+  margin-top:7%
 }

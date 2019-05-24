@@ -1,6 +1,6 @@
 var room_list = ['cracatua'];
 var current_room = localStorage.getItem("current_room");
-
+var tema = "light";
 
 	
 	
@@ -164,7 +164,8 @@ var current_room = localStorage.getItem("current_room");
 			room_list.push(room_name);
 			const button = document.createElement('button');
 			button.innerHTML = data.room_name;
-			button.setAttribute("class", "room_button")
+			classe = "room_button btn btn-" + tema;
+			button.setAttribute("class", classe);
 			document.querySelector('#room_selection').appendChild(button);
 			roomselect.scrollTop = roomselect.scrollHeight;
 			socket.emit('button_ask');
@@ -227,4 +228,57 @@ var current_room = localStorage.getItem("current_room");
 			room_list.splice(index);
 		});
 			
+
+
+
+		document.querySelectorAll(".theme").forEach(function(button){
+			button.onclick = ()=>{
+				var theme = button.innerHTML;
+				var body = document.querySelector("body");
+				var chat = document.querySelector("#ChatBox");
+				var room_select = document.querySelector("#room_selection");
+				var theme_div = document.querySelector("#theme_selection");
+				var room_buttons = document.querySelectorAll(".room_button");
+
+
+
+				if (theme == "Dark"){
+					tema = "dark";
+					body.style.backgroundColor = "Black";
+					chat.style.backgroundColor = "#660066";
+					room_select.style.backgroundColor = "#660066";
+					theme_div.style.backgroundColor = "#660066";
+					room_buttons.forEach(function(botao){
+						botao.setAttribute("class", "room_button btn btn-dark");
+
+					});
+				}
+				
+					
+				else if( theme == "Light"){
+					tema = "light";
+					body.style.backgroundColor = "#8080ff";
+					chat.style.backgroundColor = "#ccccff";
+					room_select.style.backgroundColor = "#ccccff";
+					theme_div.style.backgroundColor = "#ccccff";
+					room_buttons.forEach(function(botao){
+						botao.setAttribute("class", "room_button btn btn-light");
+
+					});
+				}
+				else if (theme == "Summer"){
+					tema = "warning";
+					body.style.backgroundColor = "#fc7136";
+					chat.style.backgroundColor = "#fda781";
+					room_select.style.backgroundColor = "#fda781";
+					theme_div.style.backgroundColor = "#fda781";
+					room_buttons.forEach(function(botao){
+						botao.setAttribute("class", "room_button btn btn-warning");
+
+					});
+				}
+			}
+		}
+		);
+		
 	});

@@ -178,7 +178,7 @@ def pass_rooms():
 
 @socketio.on('send_message')
 def message(msg):
-	print("Hey, i am trying to send that message you sent!", file=sys.stderr)
+	print("starting the function message", file=sys.stderr)
 	mensagem = msg["mensagem"]
 	user = msg["user"]
 	room = session["user"].current_room
@@ -203,36 +203,44 @@ def create_room(data):
 
 @socketio.on('join_room')
 def join(data):
+	print("starting join function", file=sys.stderr)
 	new_room = data['room']
+
 	try:
 		old_room = session["user"].current_room
 	except:
 		old_room = None
 
-	if old_room != None:
+	
+	notnone=old_room != None
+	if notnone:
+		notequal = old_room.name != new_room
+	else:
+		notequal = True
+
+
+	if notequal and notnone:
 		leave_room(old_room)
 		for i in rooms:
 			if i.name == session["user"].current_room.name:
-
 				i.check_for_del()
 				break
-	
-	for i in rooms:
-		if i.name == new_room:
-			i.users.append(session["user"].name)
-			i.member_count +=1
-			session['user'].current_room = i
-			break
 
-	print("continued after break", file = sys.stderr)
-	join_room(new_room)
+	if notequal:	
+		for i in rooms:
+			if i.name == new_room:
+				i.users.append(session["user"].name)
+				i.member_count +=1
+				session['user'].current_room = i
+				print("finded correct room", file = sys.stderr)
+				break
+
+		join_room(new_room)
 
 
-	#enviando mensagens da sala
-
-	for i in session["user"].current_room.messages:
-		emit('broadcast_message', {'mensagem' : i.content, 'user' : i.user, "time" : i.timestamp})
-	print(session["user"].current_room.name, file = sys.stderr)
+		for i in session["user"].current_room.messages:
+			emit('broadcast_message', {'mensagem' : i.content, 'user' : i.user, "time" : i.timestamp})
+		print("ended the join function, the current room is: " + session["user"].current_room.name, file = sys.stderr)
 
 
 
@@ -265,9 +273,9 @@ def logoff(data):
 	print("yes, i did logoff", file=sys.stderr)
 	for i in rooms:
 			if data["current_room"] == i.name:
-				i.users.remove(session["user"].name)
+				i.check_for_del()
 	session['user'].logoutU()
 	return redirect("/")
 
 if __name__ == "__main__":
-	socketio.run(app, debug=True)
+	socketio.run(app, host='192.168.1.5', port='5000')
