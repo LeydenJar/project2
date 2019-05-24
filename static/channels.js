@@ -93,7 +93,7 @@ var tema = "light";
 				room_list.push(room_name);
 				const button = document.createElement('button');
 				button.innerHTML = data.rooms[i];
-				button.setAttribute("class", "room_button");
+				button.setAttribute("class", "room_button btn btn-light");
 				button.setAttribute("type", "submit");
 				document.querySelector('#room_selection').appendChild(button);
 				socket.emit('button_ask')
