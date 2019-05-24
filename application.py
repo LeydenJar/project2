@@ -41,20 +41,25 @@ class newRoom(object):
 		self.users = [user1]
 		self.member_count = 1
 		leave_room(prev_Room)
+
 		if session['user'].current_room is not None:
-			session['user'].current_room.users.remove(session["user"].name)
-			session['user'].current_room.member_count -= 1
+			for i in rooms:
+				if i.name == session["user"].current_room:
+					i.users.remove(session["user"].name)
+					i.member_count -= 1
+
 		join_room(name)
 		session['user'].current_room = self
 		rooms.append(self)
 
 	def check_for_del(self):
+		self.users.remove(session['user'].name)
+		self.member_count -=1
 		if self.member_count == 0:
-			for i in rooms:
-				if i.name == self.name:
-					rooms.remove(i)
-			socket.emit("del_room", {"room" : self.name})
+			rooms.remove(self)
+			emit("del_room", {"room" : self.name})
 			del self
+
 
 """def change(self, new_room, old_room):
 		if old_room is not None:
@@ -94,7 +99,11 @@ def clean_users():
 	for i in users:
 		if now - i.last_beat > 60:
 			print("removed " + i.name, file=sys.stderr)
-			i.current_room.users.remove(i.name)
+			for n in rooms:
+				if i.current_room.name == n.name:
+					n.users.remove(i.name)
+					n.member_count -=1
+			session["user"] = None
 			users.remove(i)
 	threading.Timer(600, clean_users).start()
 	print("Ending the function Clean_Users", file=sys.stderr)
@@ -173,10 +182,7 @@ def message(msg):
 	mensagem = msg["mensagem"]
 	user = msg["user"]
 	room = session["user"].current_room
-	#room=msg["current_room"]
 	time = strftime("%H:%M")
-	if room == None:
-		print("I dont find the room", file=sys.stderr)
 	m = new_Message(user, mensagem, time, room)
 	print("i am about to emit a message to" + m.channel.name, file=sys.stderr)
 	emit('broadcast_message', {'mensagem' : m.content, 'user' : m.user, "time" : m.timestamp}, room=m.channel.name)
@@ -186,11 +192,12 @@ def create_room(data):
 	room_name = str(data["room_name"])
 	rooml = data['rooml']
 	print(room_name + "   " + rooml ,file=sys.stderr)
-	n = newRoom(room_name, rooml, session["user"].name)
-	"""for i in rooms:
+	for i in rooms:
 		if i.name == rooml:
-			i.check_for_del()"""
-	print(session['user'].current_room.name, file = sys.stderr)
+			i.check_for_del()
+			break
+	n = newRoom(room_name, rooml, session["user"].name)
+
 	emit('broadcast_new_room', {'room_name' : room_name}, broadcast=True)
 
 
@@ -204,22 +211,22 @@ def join(data):
 
 	if old_room != None:
 		leave_room(old_room)
-		old_room.users.remove(session['user'].name)
-		old_room.member_count -=1
-		old_room.check_for_del()
+		for i in rooms:
+			if i.name == session["user"].current_room.name:
+
+				i.check_for_del()
+				break
 	
 	for i in rooms:
-		print("testing the room" + i.name, file=sys.stderr)
 		if i.name == new_room:
-			print("found your room", file = sys.stderr)
+			i.users.append(session["user"].name)
+			i.member_count +=1
 			session['user'].current_room = i
-			print("it is " + session["user"].current_room.name)
 			break
 
 	print("continued after break", file = sys.stderr)
 	join_room(new_room)
-	session["user"].current_room.users.append(session["user"].name)
-	session["user"].current_room.member_count += 1
+
 
 	#enviando mensagens da sala
 
