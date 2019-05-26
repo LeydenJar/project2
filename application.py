@@ -291,8 +291,6 @@ def askRoomUsers(data):
 			roomUsers = i.users
 			emit('roomUsers', {"roomUsers" : roomUsers})
 			break
-			
-
 
 
 @socketio.on("logoff") #just a normal logoff...

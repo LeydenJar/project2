@@ -8,8 +8,7 @@ Espero que estejam gostando dos comentários
 var room_list = [];
 var current_room = localStorage.getItem("current_room");
 var tema = "light";
-
-	
+localStorage.setItem("user", nome_user);
 	
 
 	document.addEventListener('DOMContentLoaded', ()=>{
@@ -251,6 +250,7 @@ var tema = "light";
 			socket.emit("logoff", {"current_room" : current_room});
 			window.location.href = 'http://127.0.0.1:5000/';
 			localStorage.setItem("current_room", null);
+			localStorage.setItem("user", null);
 			return false;
 		}
 		
