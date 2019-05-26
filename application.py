@@ -57,7 +57,7 @@ class newRoom(object):
 		self.member_count -=1
 		if self.member_count == 0:
 			rooms.remove(self)
-			emit("del_room", {"room" : self.name})
+			emit("del_room", {"room" : self.name}, broadcast = True)
 			del self
 
 
@@ -229,13 +229,15 @@ def join(data):
 	if notequal:	
 		for i in rooms:
 			if i.name == new_room:
-				i.users.append(session["user"].name)
-				i.member_count +=1
+				if session["user"].name not in i.users:
+					i.users.append(session["user"].name)
+					i.member_count +=1
+					print("finded correct room", file = sys.stderr)
 				session['user'].current_room = i
-				print("finded correct room", file = sys.stderr)
+				join_room(new_room)
 				break
 
-		join_room(new_room)
+		
 
 
 		for i in session["user"].current_room.messages:

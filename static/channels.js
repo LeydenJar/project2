@@ -15,7 +15,10 @@ var tema = "light";
 
 		
 			socket.emit('ask_rooms');
-
+			if (current_room != null){
+				socket.emit('join_room', {"room" : current_room});
+			}
+			
 
 			console.log(localStorage.getItem("current_room"));
 
@@ -203,13 +206,13 @@ var tema = "light";
 		document.querySelector("body").onbeforeunload = function (){
 			current_room = localStorage.getItem("current_room");
 			socket.emit("logoff", {"current_room" : current_room});
-			window.location.href = 'http://127.0.0.1:5000/';
 			return false;
 		}
 		document.querySelector("#logout").onclick = function(){
 			current_room = localStorage.getItem("current_room");
 			socket.emit("logoff", {"current_room" : current_room});
 			window.location.href = 'http://127.0.0.1:5000/';
+			localStorage.setItem("current_room", null);
 			return false;
 		}
 		
