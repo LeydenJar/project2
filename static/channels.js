@@ -1,4 +1,11 @@
-var room_list = ['cracatua'];
+/*
+Those are utility variables.
+tema is portuguese for theme. I used it because I had used theme already.
+Espero que estejam gostando dos comentários
+(I hope you are enjoying the comments)
+*/
+
+var room_list = [];
 var current_room = localStorage.getItem("current_room");
 var tema = "light";
 
@@ -6,23 +13,32 @@ var tema = "light";
 	
 
 	document.addEventListener('DOMContentLoaded', ()=>{
+		//setting everything up.. more utility variables
 		var chatBox = document.querySelector('#ChatBox');
 		var roomselect = document.querySelector('#room_selection');
 		var socket=io.connect(location.protocol + '//' + document.domain + ':' + location.port);
-		var message_counter = 0;
+		var message_counter = 0; //this one is to erease the messages when needed, without having to comunicate with the server.
+
+
+
 		socket.on('connect', ()=>{
 
-
-		
+			//Here we just ask the rooms...
 			socket.emit('ask_rooms');
+
+			/*And we try to join our previous room.
+				It will not happen if you've clicked the logoff button the last time you visited the site, in this case current_room will be null
+				But it will work if you just closed your browser. In this case, you have to logon again.
+				You can choose a new name, or the same if it's still avaliable, but the room will be remembered anyway.
+				I think it is better this way, because it makes the names avaliable when someone leaves without forgetting the room that the person was.
+				(2 users cant have the same name in this project)
+			*/
 			if (current_room != null){
 				socket.emit('join_room', {"room" : current_room});
 			}
-			
-
-			console.log(localStorage.getItem("current_room"));
 
 
+			//this part introduces the enter functionality, if you press enter, the message will be sent. 
 			document.querySelector("#input").onkeypress = (e) =>{
 			 if (e.keyCode !== 13) {
       		  document.querySelector("#input").value += (e.key);
@@ -30,23 +46,27 @@ var tema = "light";
  			 else{
  			 	msg = document.querySelector('#input').value;
 				x2 = nome_user;
-				//time = now.getHours() +":"+ now.getMinutes()
 				socket.emit('send_message', {'mensagem' : msg, 'user' : x2, 'current_room' : localStorage.getItem("current_room")});
 				document.querySelector('#input').value = '';
  			 }
 				return false;
 			};
-
+			//Of course, you can always send the message via the 'Enviar' button(witch means send in portuguese, I will just let it this way)
 			document.querySelector('#button').onclick = () =>{
 				msg = document.querySelector('#input').value;
 				x2 = nome_user;
-				//time = now.getHours() +":"+ now.getMinutes()
 				socket.emit('send_message', {'mensagem' : msg, 'user' : x2, 'current_room' :  localStorage.getItem("current_room")});
 				document.querySelector('#input').value = '';
 				return false;
 			};
 
-			//**************************************************************************************//
+			/*
+			This part handles a bit of the room creation.
+			To make things easyer, you cant create a room with more that 15 characters.
+			You can't have 2 rooms with the same name also...
+			If is everything ok, the javascript shold delete the messages of your current room and procede with the creation of the new one
+
+			*/
 
 			document.querySelector('#create_room form #create_room_button').onclick = () =>{
 				room_name = document.querySelector('#create_room form #create_room_name').value;
@@ -61,15 +81,12 @@ var tema = "light";
 				}
 				else{
 					rooml = localStorage.getItem("current_room");
-					//localStorage.setItem() = room_name;
-
 					var node = document.querySelector("#ChatBox");
 						while(node.firstChild){
 							node.removeChild(node.firstChild);
 							if (message_counter !== 0){
 								message_counter --;
 								}
-							console.log(message_counter);
 							}
 
 
@@ -84,11 +101,17 @@ var tema = "light";
 			};
 		});
 
-			
+	
+
+			//Here is the heart
 			setInterval(function(){
 			socket.emit("heartbeat")
 		},10000);
 
+
+			//Here we ask for the rooms that currently exist
+			//Then we create the buttons for every room
+			//In the end we ask the server to emit the button_functionality signal that is below.
 		socket.on('passing_rooms', data=>{
 			var i;
 			for (i=0; i<data.rooms.length; i++){
@@ -99,42 +122,51 @@ var tema = "light";
 				button.setAttribute("class", "room_button btn btn-light");
 				button.setAttribute("type", "submit");
 				document.querySelector('#room_selection').appendChild(button);
-				socket.emit('button_ask')
 			}
+			socket.emit('button_ask')
 
 		});
 
+
+		/*
+		This one makes the buttons clickable.
+		It also makes a list of the users in certain room appear in the bottom right of the screen when you hover the mouse over its button
+		*/
 		socket.on('button_functionality', ()=>{
 			if (document.querySelectorAll('.room_button').length > 0){
 						document.querySelectorAll('.room_button').forEach(function(button){
 								button.onclick = ()=>{
 									room = button.innerHTML;
 									rooml = localStorage.getItem("current_room");
+
+										//Here we remove the messages in the current/old room
 										var node = document.querySelector("#ChatBox");
 										while(node.firstChild){
 											node.removeChild(node.firstChild);
 											if (message_counter !== 0){
 												message_counter --;
 											}
-											console.log(message_counter);
 										}
+
+										//Here we actually ask the server to put us in the new room
 										socket.emit('join_room', {'room' : room, 'rooml' : rooml});
 										localStorage.setItem("current_room", room);
+
+										//Here we send a message to the new room, it's a cute little message
 										msg = "Batman has joined the room!";
 										user = "system";
 										socket.emit('send_message', {"mensagem" : msg, "user" : user, "current_room" : room});
-										//current_room = room;
 										return false;
 					}
+
+
 								button.onmouseenter = ()=>{
+									//Here we make that list appear
 									room = button.innerHTML;
 									const userlistContainer = document.createElement("div");
 									userlistContainer.setAttribute("class", "userlistContainer");
 									var usernames = document.createElement("p");
-
 									socket.emit('askRoomUsers', {"room" : room});
-
-
 									socket.on('roomUsers', data=>{
 										var i = 0;
 										while (data.roomUsers[i]){
@@ -150,18 +182,19 @@ var tema = "light";
 								}
 
 								button.onmouseleave = () =>{
+									//And here we make it disappear
 									var list = document.querySelector(".userlistContainer");
 									while(list.firstChild){
 										list.removeChild(list.firstChild);
 									}
 									list.parentNode.removeChild(list);
 									return false;
-
-
 								}
 				});
 			}});
 
+
+//In this one, we make a new room button(this happensa when a room is created)
 		socket.on('broadcast_new_room', data => {
 			room_name = data.room_name;
 			room_list.push(room_name);
@@ -171,17 +204,17 @@ var tema = "light";
 			button.setAttribute("class", classe);
 			document.querySelector('#room_selection').appendChild(button);
 			roomselect.scrollTop = roomselect.scrollHeight;
-			socket.emit('button_ask');
+			socket.emit('button_ask'); //And we ask for the functionality again
 		});
 
+
+//Here we make a new message appear, if we have a lot of messages, we are going to delete the oldest ones
 		socket.on('broadcast_message', data =>{
 			if(message_counter == 100){
-				console.log("running inside");
 				var element = document.querySelector(".msg_div");
 				element.parentNode.removeChild(element);
 				message_counter --;
 			}
-			console.log("running outside");
 			const div = document.createElement('div');
 			const h = document.createElement('h4');
 			const line = document.createElement('br');
@@ -203,11 +236,16 @@ var tema = "light";
 		});
 
 
+//This one makes sure that the user will make logout even if he doesn't click the logout button.
+//This way the username become avaliable to other people to use
+//It does not interfere with the ability of the system to remember the room that the user was.
 		document.querySelector("body").onbeforeunload = function (){
 			current_room = localStorage.getItem("current_room");
 			socket.emit("logoff", {"current_room" : current_room});
 			return false;
 		}
+
+//If you press the button, the current_room item in the localStorage will be set to null, so the system won't remember your last room.
 		document.querySelector("#logout").onclick = function(){
 			current_room = localStorage.getItem("current_room");
 			socket.emit("logoff", {"current_room" : current_room});
@@ -216,6 +254,8 @@ var tema = "light";
 			return false;
 		}
 		
+
+//This one handles room deletion, it finds the right room and removes it
 		socket.on("del_room", data=>{
 			var rtd = data.room;
 			var buttons = document.getElementsByClassName("room_button");
@@ -225,14 +265,13 @@ var tema = "light";
 					buttons[i].parentNode.removeChild(buttons[i]);
 					break;
 				}
-
 			}
 			index = room_list.indexOf(rtd);
 			room_list.splice(index);
 		});
-			
 
 
+//And here we handle the theme selection stuff. In my oppinion, the dark theme is awesome. 
 
 		document.querySelectorAll(".theme").forEach(function(button){
 			button.onclick = ()=>{
@@ -279,9 +318,5 @@ var tema = "light";
 						botao.setAttribute("class", "room_button btn btn-warning");
 
 					});
-				}
-			}
-		}
-		);
-		
+				}}});
 	});
